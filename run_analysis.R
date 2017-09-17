@@ -22,7 +22,7 @@ y_train <- fread("train\\y_train.txt")
 y_test <- fread("test\\y_test.txt")
 y <- rbind(y_train, y_test)
 # Label activities
-names(y) <- "activity"
+names(y) <- "activity_code"
 
 # Read and combine the test and train subject datasets together
 subject_train <- fread("train\\subject_train.txt")
@@ -42,17 +42,17 @@ data <- cbind(subject, y, X)
 # Find features that end with -mean() or -std()
 sel_features <- grep("(-mean\\(\\)|-std\\(\\))$", features$name, value=TRUE)
 # Subset the data by retaining only the selected features
-data <- data[, c("subject",  "activity", sel_features), with=FALSE]
+data <- data[, c("activity_code", "subject", sel_features), with=FALSE]
 
 
 ### ------------------------------------------------------------------------
 ### (3) Uses descriptive activity names to name the activities in the data set
 
 # Read the activity labels
-activities <- fread("activity_labels.txt", col.names = c("code", "label"))
+activities <- fread("activity_labels.txt", col.names = c("code", "activity"))
 # replace activity codes by labels in the data
-data$activity <- merge(data, activities, by.x="activity", by.y="code")$label
-
+data <- data %>% merge(activities, by.x="activity_code", by.y="code") %>%
+                 select(activity, subject, sel_features)
 
 ### ------------------------------------------------------------------------
 ### (4) Appropriately labels the data set with descriptive variable names
